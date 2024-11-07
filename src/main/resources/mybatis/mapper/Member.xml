@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.zeronelab.mybatis.dao.MemberMapper">
+
+    <select id="idCheck" resultType="dev.zeronelab.mybatis.vo.MemberEntity">
+        select count(*) as count
+        from
+        member
+        where
+        mid = #{mid}
+    </select>
+
+    <select id="eamilCheck" resultType="dev.zeronelab.mybatis.vo.MemberEntity">
+        select count(*) as count
+        from
+        member
+        where
+        memail = #{memail}
+    </select>
+
+    <insert id="join">
+        insert into member
+        (mno, mid, mpw, mname, mdate, mcell, memail)
+        values
+        (mno_seq.nextval, #{mid}, #{mpw}, #{mname}, sysdate,
+        #{mcell1} || '-' || #{mcell2} || '-' || #{mcell3},
+        #{memail1} || '@' || #{memail2})
+    </insert>
+
+    <select id="selectMemberPW" resultType="dev.zeronelab.mybatis.vo.MemberEntity">
+        select mpw
+        from
+        member
+        where mid = #{mid}
+    </select>
+
+    <select id="login" resultType="dev.zeronelab.mybatis.vo.MemberEntity">
+        select mid, mpw, mname, mno
+        from
+        member
+        where mid = #{mid}
+    </select>
+
+    <select id="jwtLogin" resultType="dev.zeronelab.mybatis.vo.MemberEntity">
+        select *
+        from
+        member
+        where mid = #{mid} and mpw = #{mpw}
+    </select>
+
+    <select id="findMno" resultType="Long">
+        select mno from member where mid = #{bwriter}
+    </select>
+
+
+    <select id="selectPasswordByMno" resultType="dev.zeronelab.mybatis.vo.MemberEntity">
+        select mpw
+        from
+        member
+        where mno = #{mno}
+    </select>
+
+    <select id="infoEmailCheck" resultType="dev.zeronelab.mybatis.vo.MemberEntity">
+        select count(*) as count
+        from
+        member
+        where
+        memail = #{memail}
+        and mno != #{mno}
+    </select>
+
+    <update id="updateMemberInfo">
+        UPDATE member
+        SET
+        mpw = #{mpw},
+        mname = #{mname},
+        mcell = #{mcell},
+        memail = #{memail}
+        WHERE mno = #{mno}
+    </update>
+
+    <delete id="deleteMemberByMno" parameterType="int">
+        DELETE FROM member WHERE mno = #{mno}
+    </delete>
+
+    <select id="idAndEmailCheck" parameterType="map" resultType="dev.zeronelab.mybatis.vo.MemberEntity">
+        SELECT *
+        FROM member
+        WHERE mid = #{mid} AND memail = #{memail}
+    </select>
+
+</mapper>

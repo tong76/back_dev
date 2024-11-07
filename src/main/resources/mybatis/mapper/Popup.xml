@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.zeronelab.mybatis.dao.PopupMapper">
+
+    <!-- 팝업리스트 조회 -->
+    <select id="listPopup"
+            resultType="dev.zeronelab.mybatis.vo.PopupEntity">
+        select * from pop
+    </select>
+
+    <select id="read"
+            resultType="dev.zeronelab.mybatis.vo.PopupEntity">
+        select * from pop where sno = #{sno}
+    </select>
+</mapper>

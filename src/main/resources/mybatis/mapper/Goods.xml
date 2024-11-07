@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.zeronelab.mybatis.dao.GoodsMapper">
+
+    <select id="goodsPopupList" resultType="dev.zeronelab.mybatis.vo.PopupEntity">
+        select *
+        from pop
+        where sno in (select pop.sno
+        from product, pop
+        where product.sno = pop.sno
+        group by pop.sno)
+        order by sno
+    </select>
+
+    <select id="goodsList" resultType="dev.zeronelab.mybatis.vo.GoodsEntity">
+        select *
+        from product
+        where sno = #{sno}
+    </select>
+
+    <select id="goodsDetail" resultType="dev.zeronelab.mybatis.vo.GoodsEntity">
+        select *
+        from product
+        where sno = #{sno}
+        and pno = #{pno}
+    </select>
+
+    <select id="reviewList" resultType="dev.zeronelab.mybatis.vo.ReviewEntity">
+        select review.*, member.mid
+        from review, member
+        where review.mno = member.mno
+        and pno = #{pno}
+        order by rno desc
+    </select>
+
+    <insert id="writeReview">
+        insert into review
+        (rno, pno, mno, rcon, rdate, rgrade)
+        values(rno_seq.nextval, #{pno}, #{mno}, #{rcon}, sysdate, #{rgrade})
+    </insert>
+
+    <update id="modifyReview">
+        update review set rcon = #{rcon}, rdate = sysdate, rgrade = #{rgrade} where rno = #{rno}
+    </update>
+
+    <delete id="deleteReview">
+        delete from review where rno = #{rno}
+    </delete>
+
+</mapper>
