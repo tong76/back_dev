@@ -3,11 +3,12 @@
 
 -- 1. oracle db인 경우
 -- sys 에서 권한 부여
-CREATE USER POP IDENTIFIED BY POP;
-GRANT CONNECT, RESOURCE TO POP;
+/* CREATE USER POP IDENTIFIED BY POP;
+GRANT CONNECT, RESOURCE TO POP; */
 
 -- POP/pop@XE로 로그인한 후,
 -- 회원정보 테이블 생성
+/* 회원 */
 /* 회원 */
 CREATE TABLE MEMBER (
 	mno NUMBER NOT NULL, /* 회원번호 */
@@ -272,7 +273,8 @@ CREATE TABLE PORDER (
 	poq NUMBER, /* 구매수량 */
 	podate DATE, /* 주문날짜 */
 	poprc NUMBER, /* 가격 */
-	post VARCHAR2(30) /* 처리상태 */
+	post VARCHAR2(30), /* 처리상태 */
+	paymentkey VARCHAR2(100) /* 결제번호 */
 );
 
 COMMENT ON TABLE PORDER IS '주문';
@@ -293,6 +295,8 @@ COMMENT ON COLUMN PORDER.poprc IS '가격';
 
 COMMENT ON COLUMN PORDER.post IS '처리상태';
 
+COMMENT ON COLUMN PORDER.paymentkey IS '결제번호';
+
 CREATE UNIQUE INDEX PK_PORDER
 	ON PORDER (
 		pono ASC
@@ -310,9 +314,9 @@ CREATE TABLE DELIVERY (
 	dno NUMBER NOT NULL, /* 배송번호 */
 	pono NUMBER, /* 주문번호 */
 	ddate DATE, /* 배송일자 */
-	dadd VARCHAR2(50), /* 배송지 */
+	dadd VARCHAR2(200), /* 배송지 */
 	dname VARCHAR2(30), /* 수령자명 */
-	dcell NUMBER /* 수령자전화번호 */
+	dcell VARCHAR2(20) /* 수령자전화번호 */
 );
 
 COMMENT ON TABLE DELIVERY IS '배송';
@@ -518,66 +522,6 @@ ALTER TABLE BCOMMENT
 			mno
 		);
 
-ALTER TABLE PORDER
-	ADD
-		CONSTRAINT FK_MEMBER_TO_PORDER
-		FOREIGN KEY (
-			mno
-		)
-		REFERENCES MEMBER (
-			mno
-		);
-
-ALTER TABLE PORDER
-	ADD
-		CONSTRAINT FK_BUCKET_TO_PORDER
-		FOREIGN KEY (
-			bkno
-		)
-		REFERENCES BUCKET (
-			bkno
-		);
-
-ALTER TABLE PORDER
-	ADD
-		CONSTRAINT FK_PRODUCT_TO_PORDER
-		FOREIGN KEY (
-			pno
-		)
-		REFERENCES PRODUCT (
-			pno
-		);
-
-ALTER TABLE DELIVERY
-	ADD
-		CONSTRAINT FK_PORDER_TO_DELIVERY
-		FOREIGN KEY (
-			pono
-		)
-		REFERENCES PORDER (
-			pono
-		);
-
-ALTER TABLE BUCKET
-	ADD
-		CONSTRAINT FK_MEMBER_TO_BUCKET
-		FOREIGN KEY (
-			mno
-		)
-		REFERENCES MEMBER (
-			mno
-		);
-
-ALTER TABLE BUCKET
-	ADD
-		CONSTRAINT FK_PRODUCT_TO_BUCKET
-		FOREIGN KEY (
-			pno
-		)
-		REFERENCES PRODUCT (
-			pno
-		);
-
 ALTER TABLE RESERVE
 	ADD
 		CONSTRAINT FK_POP_TO_RESERVE
@@ -620,8 +564,6 @@ ALTER TABLE ATTACH
 
 -- 각 테이블 시퀀스 생성
 -- 잘 확인해보세요.
--- 깃허브 테스트용 주석
--- 깃허브 테스트용 주석2
 CREATE SEQUENCE mno_seq
        INCREMENT BY 1
        START WITH 1
@@ -685,6 +627,24 @@ CREATE SEQUENCE bkno_seq
        NOCACHE
        NOORDER;
 
+CREATE SEQUENCE pono_seq
+       INCREMENT BY 1
+       START WITH 1
+       MINVALUE 1
+       MAXVALUE 9999
+       NOCYCLE
+       NOCACHE
+       NOORDER;
+
+CREATE SEQUENCE dno_seq
+       INCREMENT BY 1
+       START WITH 1
+       MINVALUE 1
+       MAXVALUE 9999
+       NOCYCLE
+       NOCACHE
+       NOORDER;
+
 
 -- 임시로 팝업, 굿즈 테이블 데이터 생성(관리자 모드로 추후에 구현)
 insert into pop (sno, sname, scon, simg, splc, sdate, scell, smedia, smap, sgimg)
@@ -706,9 +666,9 @@ values(sno_seq.nextval, '이토준지','홍대 LC타워몰에 있는 이토준�
 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3162.8869608583236!2d126.92358675579808!3d37.557726930229954!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357c99f9b5a23bfd%3A0x3fc0a700f86f63b5!2zTEPtg4Dsm4w!5e0!3m2!1sko!2skr!4v1721704878275!5m2!1sko!2skr', 'ito-junji-goods');
 
 insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-3 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '망곰키링1', 15000, '2024.07.25 ~ 2024.08.07', 10, 'mang-keyring1', '귀염뽀짝한 망곰키링을 언능 사가세요 얼마안남았어요..!');
-insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-3 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '망곰키링2', 13000, '2024.07.25 ~ 2024.08.07', 10, 'mang-keyring1', '귀염뽀짝한 망곰키링을 언능 사가세요 얼마안남았어요..!');
-insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-3 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '망곰키링3', 13000, '2024.07.25 ~ 2024.08.07', 10, 'mang-keyring1', '귀염뽀짝한 망곰키링을 언능 사가세요 얼마안남았어요..!');
-insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-3 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '망곰키링4', 15000, '2024.07.25 ~ 2024.08.07', 10, 'mang-keyring1', '귀염뽀짝한 망곰키링을 언능 사가세요 얼마안남았어요..!');
+insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-3 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '망곰키링2', 13000, '2024.07.25 ~ 2024.08.07', 10, 'mang-keyring2', '귀염뽀짝한 망곰키링을 언능 사가세요 얼마안남았어요..!');
+insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-3 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '망곰키링3', 13000, '2024.07.25 ~ 2024.08.07', 10, 'mang-keyring3', '귀염뽀짝한 망곰키링을 언능 사가세요 얼마안남았어요..!');
+insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-3 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '망곰키링4', 15000, '2024.07.25 ~ 2024.08.07', 10, 'mang-keyring4', '귀염뽀짝한 망곰키링을 언능 사가세요 얼마안남았어요..!');
 
 insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-2 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '데드풀 피규어', 30000, '2024.07.10 ~ 2024.08.07', 13, 'deadwolv-figure1', '섹시한 데드풀 피규어를 언능 사가세요 얼마안남았어요..!');
 insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-2 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '울버린 피규어', 30000, '2024.07.10 ~ 2024.08.07', 12, 'deadwolv-figure2', '섹시한 울버린 피규어를 언능 사가세요 얼마안남았어요..!');
@@ -719,3 +679,6 @@ insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pn
 insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-1 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '이토준지 아이폰 케이스', 15000, '2024.06.15 ~ 2024.09.08', 6, 'itojunji-iphone-case', '오싹한 이토준지 아이폰 케이스를 언능 사가세요 얼마안남았어요..!');
 insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-1 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '이토준지 머그컵', 25000, '2024.06.15 ~ 2024.09.08', 4, 'itojunji-mugcub', '오싹한 이토준지 머그컵을 언능 사가세요 얼마안남았어요..!');
 insert into product(pno, sno, pname, pprice, pdate, pquan, pimg, pcon) values(pno_seq.nextval, (SELECT last_number-1 sno FROM USER_SEQUENCES WHERE SEQUENCE_NAME = 'SNO_SEQ'), '이토준지 티셔츠', 30000, '2024.06.15 ~ 2024.09.08', 2, 'itojunji-tshirts', '오싹한 이토준지 티셔츠를 언능 사가세요 얼마안남았어요..!');
+
+--커밋하세요
+commit;
