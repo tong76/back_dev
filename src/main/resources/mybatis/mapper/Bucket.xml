@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.zeronelab.mybatis.dao.BucketMapper">
+
+    <insert id="addBucket">
+        insert into bucket(bkno, mno, pno, bkcnt)
+        values(bkno_seq.nextval, #{mno}, #{pno}, #{bkcnt})
+    </insert>
+
+    <update id="updateBucket">
+        update bucket set bkcnt = #{bkcnt} where mno = #{mno} and pno = #{pno}
+    </update>
+
+    <select id="chkBucket" resultType="dev.zeronelab.mybatis.vo.BucketEntity">
+        select * from bucket
+        where mno = #{mno} and pno = #{pno}
+    </select>
+
+    <select id="bucketList" resultType="dev.zeronelab.mybatis.vo.BucketEntity">
+        select product.*, bucket.bkno, bucket.mno, bucket.bkcnt
+        from product, bucket
+        where product.pno = bucket.pno
+        and bucket.mno = #{mno}
+        order by bkno
+    </select>
+
+    <select id="selectOnebucketList" resultType="dev.zeronelab.mybatis.vo.BucketEntity">
+        select product.*, bucket.bkno, bucket.mno, bucket.bkcnt
+        from product, bucket
+        where product.pno = bucket.pno
+        and bucket.mno = #{mno} and product.sno = #{sno} and product.pno = #{pno}
+        order by bkno
+    </select>
+
+    <select id="selectBucketList" resultType="dev.zeronelab.mybatis.vo.BucketEntity">
+        SELECT product.*, bucket.bkno, bucket.mno, bucket.bkcnt
+            FROM bucket, product
+            WHERE bucket.pno = product.pno
+            AND bkno IN (
+        SELECT bkno
+        FROM (
+            SELECT rownum - 1 AS num, bkno
+            FROM bucket
+            WHERE mno = #{mno}
+            ORDER BY bkno
+        ) temp
+        WHERE num IN
+        <foreach collection="selects" item="select" open="(" close=")" separator=",">
+            #{select}
+        </foreach>
+        )
+        ORDER BY bkno
+    </select>
+
+    <update id="increaseQuan">
+        update bucket set bkcnt = bkcnt + 1 where mno = #{mno} and pno = #{pno}
+    </update>
+
+    <update id="decreaseQuan">
+        update bucket set bkcnt = bkcnt - 1 where mno = #{mno} and pno = #{pno}
+    </update>
+
+    <delete id="deleteBucket">
+        delete bucket where mno = #{mno} and pno = #{pno}
+    </delete>
+
+    <select id="getPnos" resultType="int">
+        select pno from bucket
+        where bkno = (select bkno from 
+                        (select rownum - 1 as num, bkno from bucket where mno = #{mno} order by bkno)
+                      where num = #{product})
+    </select>
+
+</mapper>

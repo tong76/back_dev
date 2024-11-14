@@ -1,0 +1,52 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.zeronelab.mybatis.dao.PaymentMapper">
+    <insert id="addPaymentDetail">
+        insert into porder
+        values(pono_seq.nextval, #{bucketEntity.mno}, #{bucketEntity.pno},
+        #{bucketEntity.bkno}, #{bucketEntity.bkcnt}, sysdate, #{bucketEntity.pprice}, #{status}, #{paymentKey})
+    </insert>
+
+    <select id="orderList" resultType="dev.zeronelab.mybatis.vo.PorderEntity">
+        select 
+            porder.paymentkey,
+            porder.post,
+            to_char(porder.podate, 'yyyy-mm-dd') as podate,
+            porder.poq,
+            porder.poprc,
+            porder.mno,
+            product.pno,
+            product.sno, 
+            product.pname,
+            product.pimg
+        from porder
+            join product on porder.pno = product.pno
+        where porder.mno = #{mno}
+        order by porder.pono desc
+    </select>
+
+    <delete id="deleteOrderSummary">
+        delete from porder where mno = #{bucketEntity.mno} and paymentKey = #{paymentKey}
+    </delete>
+
+    <select id="findPaymentKey" resultType="dev.zeronelab.mybatis.vo.PorderEntity">
+        select * from porder where paymentkey = #{paymentKey}
+        order by pono
+    </select>
+
+    <insert id="deliveryRegist">
+        insert into delivery values(dno_seq.nextval, #{pono}, sysdate, #{dadd}, #{dname}, #{dcell})
+    </insert>
+
+    <select id="deliveryInfo" resultType="dev.zeronelab.mybatis.vo.PorderEntity">
+        select delivery.dadd,delivery.dcell,delivery.dname,
+               porder.poprc, porder.poq,
+               product.pname, product.pimg
+        from delivery, porder, product
+        where delivery.pono = porder.pono and
+              porder.pno = product.pno
+        and porder.paymentkey = #{paymentKey}
+    </select>
+</mapper>

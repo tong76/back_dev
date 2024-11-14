@@ -12,4 +12,6 @@ public class BoardDTO {
     private String btitle;
     private String bcon;
     private String bwriter;
+
+    private String[] files;
 }

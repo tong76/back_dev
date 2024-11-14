@@ -6,13 +6,10 @@
 <mapper namespace="dev.zeronelab.mybatis.dao.GoodsMapper">
 
     <select id="goodsPopupList" resultType="dev.zeronelab.mybatis.vo.PopupEntity">
-        select *
-        from pop
-        where sno in (select pop.sno
-        from product, pop
-        where product.sno = pop.sno
-        group by pop.sno)
-        order by sno
+        select distinct pop.*
+        from pop, product
+        where pop.sno = product.sno
+        order by pop.sno
     </select>
 
     <select id="goodsList" resultType="dev.zeronelab.mybatis.vo.GoodsEntity">

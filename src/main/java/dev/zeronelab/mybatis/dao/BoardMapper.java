@@ -32,6 +32,12 @@ public interface BoardMapper {
 
     public void boardAddAttach(String fullName);
 
+    public List<String> getAttach(Integer bno);
+
+    public void removeAttach(BoardDTO dto);
+
+    public void replaceAttach(Long bno, String fullName);
+
     // 게시글 페이징 및 검색
     List<BoardEntity> listSearch(Criteria cri);
 

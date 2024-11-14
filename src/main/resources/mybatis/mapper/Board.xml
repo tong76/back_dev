@@ -129,4 +129,17 @@
         insert into ATTACH(fullname, bno, regdate) values
         (#{fullName}, bno_seq.currval, sysdate)
     </insert>
+	
+    <select id="getAttach" resultType="String">
+        select fullname from attach where bno = #{bno}
+    </select>
+
+    <delete id="removeAttach">
+		delete from ATTACH where bno = #{bno}
+	</delete>
+
+	<insert id="replaceAttach">
+		insert into ATTACH(fullname, bno, regdate) values
+		(#{fullName}, #{bno}, sysdate)
+	</insert>
 </mapper>
